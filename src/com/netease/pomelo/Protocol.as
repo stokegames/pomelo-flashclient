@@ -1,8 +1,6 @@
 package com.netease.pomelo
 {
   public class Protocol {
-    import com.netease.pomelo.Message;
-    import flash.utils.ByteArray;
 
     private static var HEADER:int = 5;
 
