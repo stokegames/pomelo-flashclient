@@ -21,4 +21,6 @@ trace("socketDataHandler: " + e.data);
 }
 服务端的通知返回的格式是：{"route":"xxx","body":{}}, 在这个function的处理中会进入processMessageBatch处理，而processMessageBatch假定data是数据，导致根本就不要调用回调。
 
-所以 socketInputHandler中的判断是否应该是 if(data.id || data.route) ...才对？
+所以 socketInputHandler中的判断是否应该是 if(data.id || data.route) ...才对
+
+增加删除注册的事件的方法
