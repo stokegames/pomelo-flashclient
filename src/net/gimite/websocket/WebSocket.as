@@ -150,7 +150,7 @@ public class WebSocket extends EventDispatcher {
     try {
       data = decodeURIComponent(encData);
     } catch (ex:URIError) {
-      logger.error("SYNTAX_ERR: URIError in send()");
+      logger.error("SYNTAX_ERR: URIError in send():"+encData+"["+ex.message+"]");
       return 0;
     }
     logger.log("send: " + data);

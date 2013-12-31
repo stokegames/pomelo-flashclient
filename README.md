@@ -1,79 +1,26 @@
 pomelo-flashclient
 ====================
 
-* Pomelo client for Flash.
+修正原版本的如下问题：
 
-* pomelo-flashclient is an easy-to-use pomelo client for Adobe Flash Player.
+Protocol.encode生成%导致的 [Error #1052: Invalid URI passed to decodeURIComponent function.]
 
-## How to use
+我们使用这个库时发现服务端发过来的broadcast不能通知到回调，然后查看了com.netease.pomelo.Client的socketInputHandler方法：
 
-Using pomelo-flashclient is quite simple.
+protected function socketInputHandler(e:FlashSocketEvent):void {
 
-Checkout and copy the files into the root folder of your project.
+trace("socketDataHandler: " + e.data);
 
->git clone https://github.com/stokegames/pomelo-flashclient.git
+  var data:Object = JSON.parse(e.data);
 
-## API
+  if(data.id) {
+    this.processMessage(data);
+  } else {
+    this.processMessageBatch(data);
+  }
+}
+服务端的通知返回的格式是：{"route":"xxx","body":{}}, 在这个function的处理中会进入processMessageBatch处理，而processMessageBatch假定data是数据，导致根本就不要调用回调。
 
-create and initialize a new pomelo client:
-```as3
-import com.netease.pomelo.Client;
+所以 socketInputHandler中的判断是否应该是 if(data.id || data.route) ...才对
 
-var client:Client = new Client();
-
-client.init(host, port, null, function():void {
-  // now that you're connected, do stuff here
-});
-```
-
-send request to server and process data in callback:
-```as3
-client.request(route, msg, function(data:Object):void {
-  // handle data here
-});
-```
-
-notify the server without response:
-```as3
-client.inform(route, msg);
-```
-
-receive a broadcasted message:
-```as3
-client.on(route, unction(data:Object):void {
-  // handle data from server 
-});
-```
-
-disconnect from the server:
-```as3
-client.disconnect();
-```
-
-## Dependency
-
-Support dependencies for `pomelo-flashclient` are already included. There is a dependency of these open-source projects:
-
-* [web-socket-js](https://github.com/gimite/web-socket-js)
-* [FlashSocket.IO](https://github.com/simb/FlashSocket.IO)
-
-### Flash socket policy file
-
-This implementation uses Flash sockets, which means that your server must provide Flash socket policy file to declare the server accepts connections from Flash.
-
-Pomelo uses Socket.io, which should provide the policy file on port 10843, but there's difficulty getting it working at the moment, and it's better to provide the socket policy file at port 843. Flash always tries to connect the port 843, so providing the file at port 843 which makes the startup faster. You can use a Node.js server for that here: [pomelo-flashpolicyserver](https://github.com/stokegames/pomelo-flashpolicyserver)
-
-## Contributors
-* NetEase, Inc.
-* Eric Muyser
-
-## License
-(The MIT License)
-
-Copyright (c) 2013 Netease, Inc. and other contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+增加删除注册的事件的方法

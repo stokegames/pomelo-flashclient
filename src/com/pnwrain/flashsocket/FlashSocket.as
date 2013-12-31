@@ -1,9 +1,6 @@
 package com.pnwrain.flashsocket
 {
 	import com.pnwrain.flashsocket.events.FlashSocketEvent;
-	import net.gimite.websocket.WebSocket;
-	import net.gimite.websocket.WebSocketEvent;
-	import net.gimite.websocket.IWebSocketLogger;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -19,6 +16,10 @@ package com.pnwrain.flashsocket
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.URLUtil;
+	
+	import net.gimite.websocket.IWebSocketLogger;
+	import net.gimite.websocket.WebSocket;
+	import net.gimite.websocket.WebSocketEvent;
 
 	public class FlashSocket extends EventDispatcher implements IWebSocketLogger
 	{
@@ -186,7 +187,8 @@ package com.pnwrain.flashsocket
 		}
 		public function log(message:String):void {
 			if (debug) {
-				trace("webSocketLog: " + message);
+				var d:Date = new Date();
+				trace("webSocketLog ["+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()+"]:" + message);
 			}
 		}
 		
